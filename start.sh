@@ -3,18 +3,6 @@
 # Activate the virtual environment
 . /home/evr/python_for_electrumx/bin/activate
 
-# Init Data folders EVR
-if [ -z "$(ls -A /home/evr/.evrmore)" ]; then
-    echo "SetUp blockchain data......."
-    cp -r /init-files/evrmore-data/* /home/evr/.evrmore/
-fi
-
-# Init Data folders Electrumx
-if [ -z "$(ls -A /home/evr/electrumx)" ]; then
-    echo "SetUp ElectrumX database data......."
-    cp -r /init-files/electrumx-data/* /home/evr/electrumx/
-fi
-
 # Generate SSL certificates if they don’t exist
 if [ ! -f "$SSL_CERTFILE" ] || [ ! -f "$SSL_KEYFILE" ]; then
     echo "SSL certificates do not exist, generating new ones..."
@@ -31,7 +19,7 @@ fi
 # Check and create evrmore.conf if it doesn’t exist
 if [ ! -f "/home/evr/.evrmore/evrmore.conf" ]; then
     echo "The evrmore.conf file does not exist, creating it..."
-    echo -e "server=1\nwhitelist=127.0.0.1\ntxindex=1\naddressindex=1\nassetindex=1\ntimestampindex=1\nspentindex=1\nrpcallowip=127.0.0.1\nrpcuser=yourname\nrpcpassword=yourpassword\nuacomment=my_evr_node\nmempoolexpiry=72\nrpcworkqueue=1100\nmaxmempool=2000\ndbcache=1000\nmaxtxfee=1.0\ndbmaxfilesize=64\nrest=1\nrpcport=8819" > /home/evr/.evrmore/evrmore.conf
+    echo -e "server=1\nwhitelist=127.0.0.1\ntxindex=1\naddressindex=1\nassetindex=1\ntimestampindex=1\nspentindex=1\nrpcallowip=127.0.0.1\nrpcuser=yourname\nrpcpassword=yourpassword\nuacomment=evrx\nmempoolexpiry=72\nrpcworkqueue=1100\nmaxmempool=2000\ndbcache=1000\nmaxtxfee=1.0\ndbmaxfilesize=64\nrest=1\nrpcport=8819" > /home/evr/.evrmore/evrmore.conf
     echo "The evrmore.conf file has been created."
 else
     echo "The evrmore.conf file already exists."

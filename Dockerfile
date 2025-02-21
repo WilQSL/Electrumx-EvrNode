@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 
 # Create the evr user and necessary directories
 RUN useradd -m -s /bin/bash evr \
-    && mkdir -p /home/evr/.evrmore /home/evr/evrmore /home/evr/electrumx \
+    && mkdir -p /home/evr/.evrmore /home/evr/evrmore \
     && chown -R evr:evr /home/evr
 
 # Download and extract Evrmore
@@ -28,14 +28,23 @@ RUN wget -O /tmp/evrmore.tar.gz https://github.com/EvrmoreOrg/Evrmore/releases/d
     && chown -R evr:evr /home/evr/evrmore \
     && rm -rf /tmp/evrmore.tar.gz
 
-# Set environment variables for Evrmore
-ENV LD_LIBRARY_PATH="/home/evr/evrmore/lib"
-ENV PATH="/home/evr/evrmore/bin:$PATH"
-
 # Install virtualenv and create a Python environment
 USER evr
 RUN pip3 install --user virtualenv \
     && python3 -m virtualenv /home/evr/python_for_electrumx
+
+
+# Install ElectrumX in the virtual environment
+RUN . /home/evr/python_for_electrumx/bin/activate \
+    && git clone https://github.com/EvrmoreOrg/electrumx-evrmore.git /home/evr/electrumx \
+    && mkdir -p /home/evr/electrumx/electrumx_db \
+    && cd /home/evr/electrumx \
+    && pip3 install -r requirements.txt \
+    && pip3 install websockets
+
+# Set environment variables for Evrmore
+ENV LD_LIBRARY_PATH="/home/evr/evrmore/lib"
+ENV PATH="/home/evr/evrmore/bin:$PATH"
 
 # Install evrhash in the virtual environment ( meybe I can copy it will be save some space and time)
 RUN . /home/evr/python_for_electrumx/bin/activate \
@@ -68,8 +77,8 @@ EXPOSE 8819 50001 50002 50004 8000
 # copy chain data /init-files
 # COPY ./evrmore-data /init-files/evrmore-data
 # COPY ./electrumx-data /init-files/electrumx-data
-COPY ./evrmore-data /init-files/evrmore-data
-COPY ./electrumx-data /init-files/electrumx-data
+#COPY /home/evr/.evrmore /init-files/evrmore-data
+#COPY /home/evr/electrumx /init-files/electrumx-data
 
 USER root
 RUN chown -R evr:evr /home/evr/.evrmore /home/evr/electrumx
@@ -77,12 +86,5 @@ RUN chown -R evr:evr /home/evr/.evrmore /home/evr/electrumx
 # Copy the startup script
 COPY start.sh /home/evr/start.sh
 RUN chown evr:evr /home/evr/start.sh && chmod +x /home/evr/start.sh
-
-# Install ElectrumX in the virtual environment
 USER evr
-RUN . /home/evr/python_for_electrumx/bin/activate \
-    && cd /init-files/electrumx-data \
-    && pip3 install -r requirements.txt \
-    && pip3 install websockets 
-
 CMD ["/home/evr/start.sh"]
