@@ -1,6 +1,8 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
+
+# check if we need all and hardcoded evrhash without compiling??
 RUN apt-get update && apt-get install -y \
     wget \
     mc \
@@ -35,7 +37,7 @@ USER evr
 RUN pip3 install --user virtualenv \
     && python3 -m virtualenv /home/evr/python_for_electrumx
 
-# Install evrhash in the virtual environment
+# Install evrhash in the virtual environment ( meybe I can copy it will be save some space and time)
 RUN . /home/evr/python_for_electrumx/bin/activate \
     && git clone https://github.com/EvrmoreOrg/cpp-evrprogpow.git /home/evr/evrhash \
     && cd /home/evr/evrhash \
@@ -60,13 +62,14 @@ ENV AIRDROP_CSV_FILE="/home/evr/electrumx/electrumx/airdropindexes.csv"
 
 ENV PATH="/home/evr/python_for_electrumx/bin:$PATH"
 
-# Expose ports (RPC and ElectrumX)
+# Expose ports (RPC and ElectrumX for electrumx just need 5002)
 EXPOSE 8819 50001 50002 50004 8000
 
-
-#chain data
-COPY ./evrmore-data /home/evr/.evrmore
-COPY ./electrumx-data /home/evr/electrumx
+# copy chain data /init-files
+# COPY ./evrmore-data /init-files/evrmore-data
+# COPY ./electrumx-data /init-files/electrumx-data
+COPY ./evrmore-data /init-files/evrmore-data
+COPY ./electrumx-data /init-files/electrumx-data
 
 USER root
 RUN chown -R evr:evr /home/evr/.evrmore /home/evr/electrumx
@@ -78,7 +81,7 @@ RUN chown evr:evr /home/evr/start.sh && chmod +x /home/evr/start.sh
 # Install ElectrumX in the virtual environment
 USER evr
 RUN . /home/evr/python_for_electrumx/bin/activate \
-    && cd /home/evr/electrumx \
+    && cd /init-files/electrumx-data \
     && pip3 install -r requirements.txt \
     && pip3 install websockets 
 
